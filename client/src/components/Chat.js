@@ -7,14 +7,12 @@ export default function Chat({ ws, username, unreadInitial }) {
   const [typing, setTyping] = useState("");
   const chatEndRef = useRef();
 
-  // Add unread messages first
   useEffect(() => {
     if (unreadInitial) setMessages(unreadInitial.map(m => ({ ...m, unread: true })));
   }, [unreadInitial]);
 
   useEffect(() => {
     if (!ws) return;
-
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       switch (data.type) {
@@ -29,24 +27,24 @@ export default function Chat({ ws, username, unreadInitial }) {
           break;
         case "typing":
           if (data.username !== username) setTyping(`${data.username} is typing...`);
-          setTimeout(() => setTyping(""), 1000);
+          setTimeout(() => setTyping(""), 2000);
           break;
         default:
           break;
       }
     };
   }, [ws, username]);
+  
+const sendMessage = () => {
+  if (message.trim() === "") return;
+  ws.send(JSON.stringify({ type: "message", message }));
+  setMessage(""); // Don't add it locally
+};
 
-  const sendMessage = () => {
-    if (message.trim() === "") return;
-    ws.send(JSON.stringify({ type: "message", message }));
-    setMessages(prev => [...prev, { sender: username, message, timestamp: new Date(), unread: false }]);
-    setMessage("");
-  };
 
   const handleTyping = () => ws.send(JSON.stringify({ type: "typing" }));
 
-  // Scroll to bottom
+  // Scroll to botto
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -58,29 +56,41 @@ export default function Chat({ ws, username, unreadInitial }) {
 
   return (
     <div className="container">
-      <h2>Welcome, {username}</h2>
-      <div className="online-users">
-        <h3>Online Users:</h3>
-        <ul>{onlineUsers.map(u => <li key={u}>{u}</li>)}</ul>
+      <div className="header">
+        <h2>Welcome, {username}</h2>
+      </div>
+      
+
+      <div className="chat-body">
+        <div className="online-users">
+          <h3>Online</h3>
+          <ul>{onlineUsers.map(u => <li key={u}>{u}</li>)}</ul>
+        </div>
+
+        <div className="chat-box" onClick={markAsRead}>
+          {messages.map((m, i) => (
+            <div
+              key={i}
+              className={`message ${m.sender === username ? "self" : "other"} ${m.unread ? "unread" : ""}`}
+            >
+              <b>{m.sender}</b>: {m.message}
+              <div className="timestamp">{new Date(m.timestamp).toLocaleTimeString()}</div>
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+          {typing && <div className="typing">{typing}</div>}
+        </div>
       </div>
 
-      <div className="chat-box" onClick={markAsRead}>
-        {messages.map((m, i) => (
-          <div key={i} className={`message ${m.unread ? "unread" : ""}`}>
-            <b>{m.sender}</b>: {m.message} <small>{new Date(m.timestamp).toLocaleTimeString()}</small>
-          </div>
-        ))}
-        <div ref={chatEndRef} />
+      <div className="input-box">
+        <input
+          value={message}
+          onChange={e => setMessage(e.target.value)}
+          onKeyDown={handleTyping}
+          placeholder="Type a message..."
+        />
+        <button onClick={sendMessage}>Send</button>
       </div>
-      {typing && <div className="typing">{typing}</div>}
-
-      <input
-        value={message}
-        onChange={e => setMessage(e.target.value)}
-        onKeyDown={handleTyping}
-        placeholder="Type your message..."
-      />
-      <button onClick={sendMessage}>Send</button>
     </div>
   );
 }
