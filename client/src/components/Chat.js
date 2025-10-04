@@ -44,7 +44,7 @@ const sendMessage = () => {
 
   const handleTyping = () => ws.send(JSON.stringify({ type: "typing" }));
 
-  // Scroll to botto
+  // Scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -56,7 +56,7 @@ const sendMessage = () => {
 
   return (
     <div className="container">
-      <div className="header">
+      <div className="header bg-gray-800">
         <h2>Welcome, {username}</h2>
       </div>
       
@@ -89,8 +89,8 @@ const sendMessage = () => {
           onKeyDown={handleTyping}
           placeholder="Type a message..."
         />
-        <button onClick={sendMessage}>Send</button>
-      </div>
+        <button onClick={sendMessage} className="bg-gray-800">Send</button>
+      </div>  
     </div>
   );
 }

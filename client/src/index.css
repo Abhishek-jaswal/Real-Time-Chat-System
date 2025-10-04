@@ -22,7 +22,6 @@ body {
 
 .header {
   padding: 15px;
-  background-color: #075e54;
   color: #fff;
   border-radius: 10px 10px 0 0;
 }
@@ -100,13 +99,12 @@ body {
   padding: 10px 20px;
   border-radius: 20px;
   border: none;
-  background-color: #075e54;
   color: white;
   cursor: pointer;
 }
 
 .input-box button:hover {
-  background-color: #0a7f60;
+  background-color: gray;
 }
 
 .typing {
